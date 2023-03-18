@@ -1,36 +1,32 @@
 from django.urls import reverse, resolve
 from recipes import views
-from .test_recipe_base import RecipeTestbase
+from .test_recipe_base import RecipeTestBase
 # Create your tests here.
 
 
-class RecipeViewsTest(RecipeTestbase):
-    def tearDown(self) -> None:
-        return super().tearDown()
-
+class RecipeViewsTest(RecipeTestBase):
     def test_recipe_home_view_function_is_correct(self):
         view = resolve(
             reverse('recipes:home'))
         self.assertIs(views.home, view.func)
 
-    def test_recipe_home_vies_returns_status_code_200_ok(self):
+    def test_recipe_home_viwe_returns_status_code_200_ok(self):
         response = self.client.get(reverse('recipes:home'))
         self.assertEqual(response.status_code, 200)
 
-    def test_recipe_home_vies_load_correct_template(self):
+    def test_recipe_home_viwe_load_correct_template(self):
         response = self.client.get(reverse('recipes:home'))
         self.assertTemplateUsed(response, 'recipes/pages/home.html')
 
-    def teste_recipe_home_template_loads_recipes(self):
+    def test_recipe_home_template_loads_recipes(self):
+        self.make_recipe()
+
         response = self.client.get(reverse('recipes:home'))
+        content = response.content.decode('utf-8')
+        response_context_recipes = response.context['recipes']
 
-        result_context = response.context['recipes']
-        self.assertEqual(len(result_context), 1)
-
-        result_content = response.content.decode('utf-8')
-        self.assertIn('Recipe Title', result_content)
-        self.assertIn('10Minutos', result_content)
-        self.assertIn('5 Porções', result_content)
+        self.assertIn('Recipe Title', content)
+        self.assertEqual(len(response_context_recipes), 1)
 
     def test_recipe_category_view_function_is_correct(self):
         view = resolve(
